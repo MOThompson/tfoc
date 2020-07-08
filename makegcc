@@ -1,0 +1,28 @@
+# Makefile for building with GCC
+
+CC = gcc
+CFLAGS = -ansi -Wall -O2
+
+################################################################
+TARGET   = tfoc.exe
+LIB_OBJS = fresnel.o sample.o material.o spline.o free_carrier.o gcc_help.o
+################################################################
+
+ALL: $(TARGET)
+
+CLEAN:
+	rm *.o *.exe
+
+$(TARGET): tfoc.o $(LIB_OBJS)
+	$(CC) $(CFLAGS) -o $(TARGET) tfoc.o $(LIB_OBJS)
+
+.c.o:
+	$(CC) $(CFLAGS) -c $<
+
+tfoc.obj         : tfoc.h gcc_help.h
+fresnel.obj      : tfoc.h gcc_help.h
+material.obj     : tfoc.h gcc_help.h
+sample.obj       : tfoc.h gcc_help.h
+spline.obj       : tfoc.h gcc_help.h
+free_carrier.obj : tfoc.h gcc_help.h
+tfoc_module.obj  : tfoc.h gcc_help.h

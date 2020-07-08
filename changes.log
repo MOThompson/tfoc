@@ -1,0 +1,48 @@
+July 2020 - generated clean code for GCC, including secure extension routines
+
+July 2020 - added unpolarized options (returns average of TE and TM)
+
+Mar 2018 - added -ve to vary energy in eV for AgI lab calculations
+
+June 2017 - fixed problem with next token after "-lambda 633" dumped on command line.
+
+Feb 2015 - added '%' as a comment identifier for sample files
+
+Feb 2015
+   Modified the sample scanning routine to permit specification of units
+   in the film thickness.  
+    air
+    c-Si 10 um doping=1E19
+    c-Si
+   Similarly allowed on command line arguments except there is no optional
+   space before the unit.
+     tfoc -sample simple.sam -lambda 0.00106cm -thickness 1 100000A
+
+Mar 2010
+   Added ability to have a mixture of materials.  This is specified in the
+   layers as 
+     [ {SERIES | PARALLEL | MAXWELL-GARNETT | BRUGGEMAN} 0.8 SiO2 0.2 Si3N4 ]
+   where the first item is optional and specifies the mixing model to be used
+   for the effective medium approximation, followed by a structure consisting
+   of mixed 80% SiO2 and 20% Si3N4.
+
+   The models are:
+       SERIES          - index is just weighted average of the index terms
+       PARALLEL        - index is weighted sum of inverse index terms
+       LOOYENGA        - Symmetric weighted sum of eps^1/3.
+       MAXWELL-GARNETT - Maxwell-Garnett valid only for 2 components.  The
+                         small volume fraction is taken as the inclusion
+       BRUGGEMAN       - Symmetric.  Although expression is valid for an
+                         arbitrary number of components, exact value only
+                         derived for two components.
+
+   Multiple complex structures can be written recursively.
+     [ 0.8 [ 0.2 SiO2 c-Si 0.8 ] 0.2 Si3N4 ]
+   specifies a layer of 80% mixture of (20% SiO2 / 80% c-Si) with 20% of Si3N4
+
+May 2009:
+   The free carrier absorption is now limited to an alpha of 3E4, which
+   for CO2 gives a reflectivity of 10-11% at high temperature from an
+   undoped sample.  Need some sort of experimental data to validate 
+   these values in reality.
+
