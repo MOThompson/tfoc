@@ -1,10 +1,10 @@
-# Makefile for building with GCC
+# Makefile for building with GCC on a Linux machine
 
 CC = gcc
 CFLAGS = -Wall -O2
 
 ################################################################
-TARGET   = tfoc.exe
+TARGET   = tfoc
 LIB_OBJS = fresnel.o sample.o material.o spline.o free_carrier.o gcc_help.o
 ################################################################
 
@@ -14,7 +14,7 @@ CLEAN:
 	rm *.o *.exe
 
 $(TARGET): tfoc.o $(LIB_OBJS)
-	$(CC) $(CFLAGS) -o $(TARGET) tfoc.o $(LIB_OBJS)
+	$(CC) $(CFLAGS) -o $(TARGET) tfoc.o $(LIB_OBJS) -lm
 
 .c.o:
 	$(CC) $(CFLAGS) -c $<

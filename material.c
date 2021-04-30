@@ -252,11 +252,15 @@ TFOC_MATERIAL *TFOC_FindMaterial(char *name, char *database) {
 			while (isspace(*aptr)) aptr++;
 			if (*aptr == '\0' || *aptr == '#') continue;			/* Comment */
 			if (strncmp(aptr, "/*", 2) == 0) continue;			/* Another comment */
-			ev[npt] = strtod(aptr, &aptr);
-			n[npt]  = strtod(aptr, &aptr);
-			k[npt]  = fabs(strtod(aptr, &aptr));				/* So stored as positive */
+			ev[npt] = strtod(aptr, &aptr); 
+			if (ev[npt] <= 0) continue;								/* Ignore bad lines */
+			while (*aptr == ',' || isspace(*aptr)) aptr++;		/* Allows .csv which replace white space with , */
+			n[npt]  = strtod(aptr, &aptr); 
+			while (*aptr == ',' || isspace(*aptr)) aptr++;		/* Allows .csv which replace white space with , */
+			k[npt]  = fabs(strtod(aptr, &aptr));					/* Force to be positive */
 			npt++;
 		}
+		fclose(funit);
 
 /* Fit the spline and fill in the entry */
 		now->n_spline = GVFitSpline(NULL, ev, n, npt, 0);

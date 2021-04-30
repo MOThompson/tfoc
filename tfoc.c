@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
 	REFL result;
 
 	/* For determining the database directory */
-	struct _stat info;
+	struct stat info;
 	char env_name[PATH_MAX];
 
 	struct {
@@ -399,11 +399,11 @@ int main(int argc, char *argv[]) {
 	if (database == NULL) {
 		if (getenv_s(&cnt, env_name, sizeof(env_name), "tfocDatabase") == 0 && cnt > 0) {	/* Ignore if required size would be more than PATH_MAX */
 			database = env_name;
-		} else if ( _stat("./tfocDatabase", &info) == 0 && info.st_mode & S_IFDIR ) {
+		} else if ( stat("./tfocDatabase", &info) == 0 && info.st_mode & S_IFDIR ) {
 			database = "./tfocDatabase/";
-		} else if ( _stat("c:/tfocDatabase", &info) == 0 && info.st_mode & S_IFDIR ) {
+		} else if ( stat("c:/tfocDatabase", &info) == 0 && info.st_mode & S_IFDIR ) {
 			database = "c:/tfocDatabase/";
-		} else if ( _stat("c:/database.nk", &info) == 0 && info.st_mode & S_IFDIR ) {		/* Compatibility with earlier versions */
+		} else if ( stat("c:/database.nk", &info) == 0 && info.st_mode & S_IFDIR ) {		/* Compatibility with earlier versions */
 			database = "c:/database.nk/";
 		} else {																									/* Better hope materials are in the same directory */
 			database = "./";
