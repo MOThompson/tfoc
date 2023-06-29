@@ -91,13 +91,15 @@ int main(int argc, char *argv[]) {
 	POLARIZATION mode=TE;							/* Polarization				*/
 	TFOC_SAMPLE *sample=NULL;						/* Sample description		*/
 	char *samplefilename=NULL;						/* Sample filename			*/
-	char *database=NULL,								/* Directory for database	*/
+	char database[PATH_MAX]="",					/* Directory for database	*/
 		  *oname=NULL;									/* Output filename			*/
 	FILE *funit=NULL;									/* Output filehandle			*/
 	BOOL terse=FALSE;									/* Terse output mode?		*/
 	BOOL detail=FALSE;								/* Output layer information? */
 	NKMOD *tmp, *tmp2;
 	REFL result;
+
+	BOOL debug = FALSE;								/* Can set as an options ... varies */
 
 	/* For determining the database directory */
 	struct stat info;
@@ -134,6 +136,9 @@ int main(int argc, char *argv[]) {
 			PrintUsage();
 			return(0);
 
+		} else if (_stricmp(aptr, "debug") == 0) {
+			debug = TRUE;
+			
 		} else if (_stricmp(aptr, "terse") == 0) {
 			terse = TRUE;
 			
@@ -331,7 +336,7 @@ int main(int argc, char *argv[]) {
 
 		} else if (_stricmp(aptr, "d") == 0 || _stricmp(aptr, "database") == 0) {
 			if (argc < 1) goto TooFewArgs;
-			database = *argv;
+			strcpy_s(database, sizeof(database), *argv);
 			argc--; argv++; 
 
 		} else if (_stricmp(aptr, "s") == 0 || _stricmp(aptr, "sample") == 0) {
@@ -396,20 +401,42 @@ int main(int argc, char *argv[]) {
 	}
 
 /* Determine the appropriate database directory (if not set in options) */
-	if (database == NULL) {
+	if (*database == '\0') {
+		/* Check the environment variables first ... one called tfocDatabase or in the tfoc directory of LocalAppData */
 		if (getenv_s(&cnt, env_name, sizeof(env_name), "tfocDatabase") == 0 && cnt > 0) {	/* Ignore if required size would be more than PATH_MAX */
-			database = env_name;
-		} else if ( stat("./tfocDatabase", &info) == 0 && info.st_mode & S_IFDIR ) {
-			database = "./tfocDatabase/";
-		} else if ( stat("c:/tfocDatabase", &info) == 0 && info.st_mode & S_IFDIR ) {
-			database = "c:/tfocDatabase/";
-		} else if ( stat("c:/database.nk", &info) == 0 && info.st_mode & S_IFDIR ) {		/* Compatibility with earlier versions */
-			database = "c:/database.nk/";
-		} else {																									/* Better hope materials are in the same directory */
-			database = "./";
+			strcpy_s(database, sizeof(database), env_name);
+		} else if (getenv_s(&cnt, env_name, sizeof(env_name), "LocalAppData") == 0 && cnt > 0) {
+			sprintf_s(database, sizeof(database), "%s/TFOC/tfocdatabase", env_name);
+			if (stat(database, &info) != 0 || ! (info.st_mode & S_IFDIR) ) {
+				sprintf_s(database, sizeof(database), "%s/TFOC/tfocdatabase.nk", env_name);
+				if (stat(database, &info) != 0 || ! (info.st_mode & S_IFDIR) ) {
+					sprintf_s(database, sizeof(database), "%s/TFOC/database", env_name);
+					if (stat(database, &info) != 0 || ! (info.st_mode & S_IFDIR) ) {
+						sprintf_s(database, sizeof(database), "%s/TFOC/database.nk", env_name);
+						if (stat(database, &info) != 0 || ! (info.st_mode & S_IFDIR) ) *database = '\0';
+					}
+				}
+			}
 		}
 	}
 
+	/* If not installed formally, check a number of well known names and paths */
+	if (*database == '\0') {
+		if ( stat("./tfocDatabase", &info) == 0 && info.st_mode & S_IFDIR ) {
+			strcpy_s(database, sizeof(database), "./tfocDatabase");
+		} else if ( stat("./tfocDatabase.nk", &info) == 0 && info.st_mode & S_IFDIR ) {
+			strcpy_s(database, sizeof(database), "./tfocDatabase.nk");
+		} else if ( stat("c:/tfocDatabase", &info) == 0 && info.st_mode & S_IFDIR ) {
+			strcpy_s(database, sizeof(database), "c:/tfocDatabase");
+		} else if ( stat("c:/database.nk", &info) == 0 && info.st_mode & S_IFDIR ) {		/* Compatibility with earlier versions */
+			strcpy_s(database, sizeof(database), "c:/database.nk");										
+		} else {																									/* Better hope materials are in the same directory */
+			strcpy_s(database, sizeof(database), ".");
+		}
+	}
+	strcat_s(database, sizeof(database), "/");														/* Append trailing path delimiter */
+	if (debug) fprintf(stderr, "tfoc database set as: \"%s\"\n", database); fflush(stderr);
+	
 /* --------------------------------------------------------------------------------
 -- Okay, look up the materials and fill in n,k values for each layer directly from
 -- the database.  Although we have temperature data, no ability to modify the n,k
@@ -701,6 +728,7 @@ static void PrintUsage(void) {
 "Options:\n"
 "     -?                              This help\n"
 "     -manual                         More detailed help\n"
+"     -debug                          Print some debug info (development only)\n"
 "     -detail                         On single calculation, print n,k per layer\n"
 "     -a[ngle]       <theta>          Incident angle (in first medium)\n"
 "     -w[avelength]  <lambda>[unit>]  Wavelength w/ optional units (nm default)\n"
