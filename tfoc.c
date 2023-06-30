@@ -102,7 +102,7 @@ int main(int argc, char *argv[]) {
 	BOOL debug = FALSE;								/* Can set as an options ... varies */
 
 	/* For determining the database directory */
-	struct stat info;
+	struct _stat info;
 	char env_name[PATH_MAX];
 
 	struct {
@@ -407,13 +407,13 @@ int main(int argc, char *argv[]) {
 			strcpy_s(database, sizeof(database), env_name);
 		} else if (getenv_s(&cnt, env_name, sizeof(env_name), "LocalAppData") == 0 && cnt > 0) {
 			sprintf_s(database, sizeof(database), "%s/TFOC/tfocdatabase", env_name);
-			if (stat(database, &info) != 0 || ! (info.st_mode & S_IFDIR) ) {
+			if (_stat(database, &info) != 0 || ! (info.st_mode & S_IFDIR) ) {
 				sprintf_s(database, sizeof(database), "%s/TFOC/tfocdatabase.nk", env_name);
-				if (stat(database, &info) != 0 || ! (info.st_mode & S_IFDIR) ) {
+				if (_stat(database, &info) != 0 || ! (info.st_mode & S_IFDIR) ) {
 					sprintf_s(database, sizeof(database), "%s/TFOC/database", env_name);
-					if (stat(database, &info) != 0 || ! (info.st_mode & S_IFDIR) ) {
+					if (_stat(database, &info) != 0 || ! (info.st_mode & S_IFDIR) ) {
 						sprintf_s(database, sizeof(database), "%s/TFOC/database.nk", env_name);
-						if (stat(database, &info) != 0 || ! (info.st_mode & S_IFDIR) ) *database = '\0';
+						if (_stat(database, &info) != 0 || ! (info.st_mode & S_IFDIR) ) *database = '\0';
 					}
 				}
 			}
@@ -422,13 +422,13 @@ int main(int argc, char *argv[]) {
 
 	/* If not installed formally, check a number of well known names and paths */
 	if (*database == '\0') {
-		if ( stat("./tfocDatabase", &info) == 0 && info.st_mode & S_IFDIR ) {
+		if ( _stat("./tfocDatabase", &info) == 0 && info.st_mode & S_IFDIR ) {
 			strcpy_s(database, sizeof(database), "./tfocDatabase");
-		} else if ( stat("./tfocDatabase.nk", &info) == 0 && info.st_mode & S_IFDIR ) {
+		} else if ( _stat("./tfocDatabase.nk", &info) == 0 && info.st_mode & S_IFDIR ) {
 			strcpy_s(database, sizeof(database), "./tfocDatabase.nk");
-		} else if ( stat("c:/tfocDatabase", &info) == 0 && info.st_mode & S_IFDIR ) {
+		} else if ( _stat("c:/tfocDatabase", &info) == 0 && info.st_mode & S_IFDIR ) {
 			strcpy_s(database, sizeof(database), "c:/tfocDatabase");
-		} else if ( stat("c:/database.nk", &info) == 0 && info.st_mode & S_IFDIR ) {		/* Compatibility with earlier versions */
+		} else if ( _stat("c:/database.nk", &info) == 0 && info.st_mode & S_IFDIR ) {		/* Compatibility with earlier versions */
 			strcpy_s(database, sizeof(database), "c:/database.nk");										
 		} else {																									/* Better hope materials are in the same directory */
 			strcpy_s(database, sizeof(database), ".");
