@@ -1,0 +1,36 @@
+genplot reset -silent
+lt 1 pen -1 lw 2
+
+/* Information:
+/*  alpha = ln(10) * absorbance / thickness
+/*  alpha = (4*pi*k)/lambda
+/*  k = lambda * alpha / (4*pi)
+
+read S1800_exposed_absorbance.dat -silent archive exposed
+read S1800_unexposed_absorbance.dat -silent archive unexposed
+
+setv T = 1230			/* Thickness in nm (as wavelength is ... so get k directly 
+
+define alpha(x) = 2.303*fit(x)/T
+define k(x) = x*alpha(x)/(4*pi)
+define ke(x) = (x<300)?k(300):((x<500)?k(x):(k(500)*exp(-(x-500)/50)))
+
+label bot "wavelength"
+label left "k (imaginary index)"
+
+retr unexposed fit spline -smooth 0.002
+pl -f ke(x) -range 300 500
+retr exposed fit spline -smooth 0.002
+ov -f ke(x) -range 300 500
+
+retr exposed fit spline -smooth 0.002
+3d read ..\S1800 -silent
+let z = ke(1240/x) 
+write ..\S1800_exposed.dat
+2d
+
+retr unexposed fit spline -smooth 0.002
+3d read ..\S1800 -silent
+let z = ke(1240/x) 
+write ..\S1800_unexposed.dat
+2d

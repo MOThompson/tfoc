@@ -1,0 +1,95 @@
+\documentclass[10pt]{article}
+\usepackage{graphics}                      % epsfig
+\usepackage{epsfig}                        % epsfig
+
+\topmargin=0pt
+\headheight=0pt
+\headsep=0pt
+\oddsidemargin=0.0in
+\textheight=9.25in
+\textwidth=6.5in
+
+\begin{document}
+
+\begin{center}
+{\bf TFOC documentation}
+\end{center}
+
+\section{Effective Medium Approximations}
+
+In the sample structure, a mixed phase material material may be
+specified using the format
+\begin{eqnarray*}
+ [ ~\lbrace\mbox{model}\rbrace~~f_1~~mat_A~~f_2~~mat_B~~\dots~]
+\end{eqnarray*}
+where the EMA (Effective Medium Approximation) model may be optionally specified
+followed by volume fractions of various materials.  The sum $f_A+f_B+\dots$ need not be
+unity as TFOC will normalize the values. Each of the materials mat$_i$ may either be
+a specific material from the database or may itself be a mixed phase model.  
+
+Some specific examples are
+\begin{itemize}
+\item\enskip [ 0.8 Si 0.2 SiO2 ]  30
+\item\enskip [ PARALLEL 0.3 Si 0.4 Si3N4 0.3 SiO2 ] 120
+\item\enskip [ 0.8 Si 0.1 [ 0.3 SiO2 0.7 Si3N4 ] 0.1 Al2O3 ] 80
+\item\enskip [ LOOYENGA 0.8 Si 0.1 [ BRUGGEMAN 0.3 SiO2 0.7 Si3N4 ] 0.1 Al2O3 ] 250
+\end{itemize}
+
+The code implements sevearl EMA models which are strictly valid in specific
+sample constructs.
+\begin{itemize}
+\item {\bf Series (default):} The series mixing is a simple weighted sum of the
+dielectric constants of the elements.  This model is symmetric and valid for any
+number of components.
+\begin{eqnarray*}
+\epsilon_{\rm eff} &=& \sum f_i \epsilon_i
+\end{eqnarray*}
+\item {\bf Parallel:} The parallel model is the other limit for the dielectric
+constant of an arbitrary mixture.  Like the series model, it is valid for an arbitrary
+number of components and is symmetric in all components:
+\begin{eqnarray*}
+\frac{1}{\epsilon_{\rm eff}} &=& \sum \frac{f_i}{\epsilon_i}
+\end{eqnarray*}
+\item {\bf Looyenga:} This model uses a weighted sum of the dielectric constant to the
+1/3 power.  See H. Looyenga, {\it Dielectric constants of heterogeneous mixtures}, Physica {\bf 31}, 401-406 (1965).
+Again, like the previous two, it has the advantage of being extensible to multiple
+components and all phases are treated symmetrically.
+\item {\bf Bruggeman:} Bruggeman in the 1930's created the master of all EMAs.  The
+form is deceptively simple and symmetric in any number of components, but as it does
+not have a closed form solution it is implemented for only two components in the code.
+The model is based on the equation:
+\begin{eqnarray*}
+\sum f_i \frac{\epsilon_i-\epsilon_{\rm eff}}{\epsilon_i+(n-1)\epsilon_{\rm eff}} = 0
+\end{eqnarray*}
+where $n$ is the dimensionality of the mixture (3 for normal 3D).  For two terms, $\epsilon_{\rm eff}$
+can be written as
+\begin{eqnarray*}
+\epsilon_{\rm eff} &=& \frac{\epsilon_A(3f_A-1)+\epsilon_B(2-3f_A) + \sqrt{[\epsilon_A(3f_A-1)+\epsilon_B(2-3f_A)]^2+8\epsilon_A\epsilon_B}}{4}
+\end{eqnarray*}
+\item {\bf Maxwell-Garnett:} This EMA was derived to explain the color in glasses and is valid primarily
+in the low volume fraction limit where the inclusions do not interact.  The lower volume fraction component
+is taken as the inclusion ($\epsilon_i)$ while the majority component is the matrix ($\epsilon_m)$.  This model is
+implemented for only two components and is not symmetric in the two elements.  The equation takes the form:
+\begin{eqnarray*}
+\frac{\epsilon_{\rm eff}-\epsilon_m}{\epsilon_{\rm eff}+2\epsilon_m} &=& f_i \left ( \frac{\epsilon_i-\epsilon_m}{\epsilon_i+2\epsilon_m} \right ) \\
+\epsilon_{\rm eff} &=& \left [ \frac{\epsilon_i(1+2f_i) - \epsilon_m(2f_i-2)}{\epsilon_m(2+f_i)+\epsilon_i(1-f_i)} \right ]\epsilon_m
+\end{eqnarray*}
+\end{itemize}
+
+\par The models are derived for pure dielectrics.  TFOC blindly extends these to the complex dielectric constant
+and uses $n = \sqrt{\epsilon}$.  There is discussion of limits for complex dielectric constants which may later
+be implemented:
+
+\vskip 1truein
+
+\noindent{\bf References:}
+\begin{enumerate}
+\item D.A. Bruggeman, Annalen der Physik, {\bf 24} (1933), 636-664.
+\item O. Wiener, Abh. D. Kongl. Sachs. Ges. d Wiss, math.-phys. K1, {\bf 32} (1912), 509.
+\item D.J Bergman, Phys. Rev. Lett. {\bf 44} (1980), 1285-1287.
+\item G.W. Milton, Appl. Phys. Lett. {\bf 37} (1980), 300-302.
+\end{enumerate}
+
+\end{document}
+\end{article}
+\bye

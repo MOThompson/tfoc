@@ -1,0 +1,27 @@
+genplot reset -silent @echo off
+lw 2 pen -1 lt 1
+
+yright on
+reg bot 0.0 3.5  label bot "energy [eV]"
+reg left 2.0 2.5 label left "index"
+reg right 0 2.0  label right "extinction coefficient" 
+
+setv E0 = 3.99				/* energy in eV
+setv C  = 48.7				/* strength in (eV)^2
+setv gamma = 2.03			/* damping in eV
+
+define n2k2(x) = 1+C*[E0^2-x^2]/[(e0^2-x^2)^2+x^2*gamma^2]	/* n^2 - k^2
+define nk(x) = C*gamma*x/[(e0^2-x^2)^2+x^2*gamma^2]/2		/* nk (2nk / 2)
+define n(x) = solve(n^2-n2k2(x)-(nk(x)/n)^2|n,1.0,3.0)		/* Two expressions for k^2
+define k(x) = nk(x)/n(x)					/* Once have n, k easy
+
+read c:\tfocDatabase\Bi2O3 -silent archive data
+
+pl -f n(x) -range 1.2 3.2 -points 200 
+ov -f k(x) -ply right
+ov data -sym FilledSquare -symsize 0.10
+
+3d 
+let z = k(x)*0
+write ..\Bi2O3
+2d

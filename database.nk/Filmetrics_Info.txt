@@ -1,0 +1,2 @@
+CNF Model:  F50-300 Rev BXR
+    Serial: 09F009
