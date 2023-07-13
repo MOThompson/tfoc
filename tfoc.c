@@ -134,7 +134,7 @@ int main(int argc, char *argv[]) {
 		aptr++;
 		if (_stricmp(aptr, "help") == 0 || *aptr == '?') {
 			PrintUsage();
-			return(0);
+			return 0;
 
 		} else if (_stricmp(aptr, "debug") == 0) {
 			debug = TRUE;
@@ -144,7 +144,7 @@ int main(int argc, char *argv[]) {
 			
 		} else if (_stricmp(aptr, "manual") == 0) {
 			PrintDetails();
-			return(0);
+			return 0;
 
 		} else if (_stricmp(aptr, "detail") == 0) {
 			detail = TRUE;
@@ -343,7 +343,7 @@ int main(int argc, char *argv[]) {
 			if (argc < 1) goto TooFewArgs;
 			aptr = *argv;	argc--; argv++; 
 			samplefilename = aptr;
-			if ( (sample = TFOC_LoadSample(samplefilename)) == NULL) return(-1);
+			if ( (sample = TFOC_LoadSample(samplefilename)) == NULL) return -1;
 
 		} else if (_stricmp(aptr, "t") == 0 || _stricmp(aptr, "thickness") == 0) {
 			if (argc < 2) goto TooFewArgs;
@@ -397,7 +397,7 @@ int main(int argc, char *argv[]) {
 		} else {
 			samplefilename = "test.sam";
 		}
-		if ( (sample = TFOC_LoadSample(samplefilename)) == NULL) return(-1);
+		if ( (sample = TFOC_LoadSample(samplefilename)) == NULL) return -1;
 	}
 
 /* Determine the appropriate database directory (if not set in options) */
@@ -446,7 +446,7 @@ int main(int argc, char *argv[]) {
 	for (i=0; sample[i].type != EOS; i++) {
 		if ( (sample[i].material = TFOC_FindMaterial(sample[i].name, database)) == NULL) {
 			fprintf(stderr, "ERROR: Unable to locate \"%s\" in the materials database directory\n", sample[i].name);
-			return(-1);
+			return -1;
 		}
 		sample[i].n = TFOC_FindNK(sample[i].material, lambda);
 	}
@@ -704,7 +704,7 @@ int main(int argc, char *argv[]) {
 		}
 	}
 	if (funit != stdout) fclose(funit);
-	return(0);
+	return 0;
 
 TooFewArgs:
 	fprintf(stderr, "ERROR: Too few arguments for given -%s option", aptr);

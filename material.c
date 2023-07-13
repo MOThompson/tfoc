@@ -152,7 +152,7 @@ TFOC_MATERIAL *TFOC_FindMaterial(char *name, char *database) {
 /* See if it already exists */
 	while (isspace(*name)) name++;
 	for (i=0; i<num_materials; i++) {
-		if (_stricmp(name, materials[i].name) == 0) return(materials+i);
+		if (_stricmp(name, materials[i].name) == 0) return materials+i;
 	}
 
 /* ----- Make sure there will be space in the sample structure for this entry */
@@ -269,7 +269,7 @@ TFOC_MATERIAL *TFOC_FindMaterial(char *name, char *database) {
 		if (now->n_spline == NULL || now->k_spline == NULL) {
 			free(now->n_spline); free(now->k_spline);
 			num_materials--;
-			return(NULL);
+			return NULL;
 		}
 	}
 	
@@ -381,7 +381,7 @@ COMPLEX TFOC_FindNK(TFOC_MATERIAL *material, double lambda) {
 #ifdef DEBUG
 	printf("FindNK returning: %f+%fi\n", n.x, n.y);
 #endif
-	return(n);
+	return n;
 }
 
 /* ===========================================================================

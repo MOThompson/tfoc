@@ -11,15 +11,17 @@ CFLAGS = /nologo /W3
 TARGET   = tfoc.exe
 LIB_FILE = tfoc.lib
 LIB_OBJS = fresnel.obj sample.obj material.obj spline.obj free_carrier.obj
-INSTALL_TARGET = ..\tfoc.exe 
 ################################################################
 
 ALL: $(TARGET) $(LIB_FILE) test_tfoc.exe
 
-INSTALL: $(INSTALL_TARGET)
+INSTALL: $(TARGET) ../tfoc.exe z:/lab/exes/tfoc.exe
 
-$(INSTALL_TARGET) : $(TARGET)
-	cp $(TARGET) $(INSTALL_TARGET)
+../tfoc.exe : $(TARGET)
+	cp $** $@
+
+z:/lab/exes/tfoc.exe : $(TARGET)
+	cp $** $@
 
 CLEAN:
 	rm *.obj *.exe *.res *.lib

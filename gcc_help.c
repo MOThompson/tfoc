@@ -168,12 +168,12 @@ int _stricmp(const char *str1, const char *str2) {
 	do {
 		if ( (a = tolower(*str1++)) != (b = tolower(*str2++)) ) {
 			if (a < b) 
-				return(-1);
+				return -1;
 			else
-				return(+1);
+				return +1;
 		}
 	} while ( a != '\0');
-	return(0);
+	return 0;
 }
 
 /* ===========================================================================
@@ -200,13 +200,13 @@ int _strnicmp(const char *str1, const char *str2, size_t count) {
 	while (count--) {
 		if ( (a = tolower(*str1++)) != (b = tolower(*str2++)) ) {
 			if (a < b) 
-				return(-1);
+				return -1;
 			else
-				return(+1);
+				return +1;
 		}
 		if ( a == '\0' ) break;
 	}
-	return(0);
+	return 0;
 }
 
 /* ===========================================================================

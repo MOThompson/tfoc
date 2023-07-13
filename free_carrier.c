@@ -476,7 +476,7 @@ int main(int argc, char *argv[]) {
 	}
 	fclose(funit);
 
-	return(0);
+	return 0;
 }
 
 int main1(int argc, char *argv[]) {
@@ -486,7 +486,7 @@ int main1(int argc, char *argv[]) {
 
 	if (argc < 5) {
 		fprintf(stderr, "Usage: mu <ND> <NA> <T> [As | P | B]\n");
-		return(0);
+		return 0;
 	}
 
 	nd = atof(argv[1]);
@@ -497,11 +497,11 @@ int main1(int argc, char *argv[]) {
 	else if (stricmp(argv[4], "B") == 0)	{ model = &B; }
 	else {
 		fprintf(stderr, "You must specify either As, P or B as the 4th parameter\n");
-		return(0);
+		return 0;
 	}
 
 	printf("T=%g\tNd=%g\tNa=%g\tDoping=%s\tMobility = %g\n", T,nd,na,model->name,MU(model,nd,na,T));
-	return(0);
+	return 0;
 }
 
 #endif

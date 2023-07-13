@@ -149,7 +149,7 @@ void *GVFitSpline(void *work, double *x, double *y, int npt, int opts) {
 	int i;
 
 /* Validity tests */
-	if (npt < 3) return(NULL);
+	if (npt < 3) return NULL;
 
 /* Create valid pointer to an array of spline structures */
 	spl = (SPLINE *) work;
@@ -167,7 +167,7 @@ void *GVFitSpline(void *work, double *x, double *y, int npt, int opts) {
 		if (i != npt) {
 			ERRprintf("ERROR: Data for spline fit must have unique X coordinates.\n");
 			if (work == NULL) free(spl);
-			return(NULL);
+			return NULL;
 		}
 	}
 
@@ -180,7 +180,7 @@ void *GVFitSpline(void *work, double *x, double *y, int npt, int opts) {
 		spl[npt-1].x = REAL_MAX;							/* Terminating condition */
 		spl[npt-1].cf[0] = spl[npt-2].cf[0];
 		spl[npt-1].cf[1] = spl[npt-1].cf[2] = 0;
-		return(spl);
+		return spl;
 	}
 
 /* ... Compute not-a-knot spline */
@@ -234,7 +234,7 @@ void *GVFitSpline(void *work, double *x, double *y, int npt, int opts) {
 	spl[npt-2].cf[2] = GVTrimToReal(tmp2/t2/t2);
 
 	spl[npt-1].x = REAL_MAX;							/* Terminating condition */
-	return(spl);
+	return spl;
 }
 
 
@@ -255,10 +255,10 @@ double GVEvalSpline(void *work, double x) {
 	SPLINE *spl;
 
 	spl = (SPLINE *) work;						/* Just rename it		 */
-	if (x <= spl[0].x) return(spl[0].y);	/* Constant extension */
+	if (x <= spl[0].x) return spl[0].y;		/* Constant extension */
 
 	while (x > spl[1].x) spl++;				/* Should terminate by REAL_MAX */
-	if (spl[1].x == REAL_MAX) return(spl[0].y);
+	if (spl[1].x == REAL_MAX) return spl[0].y;
 
 	x = x - spl->x;								/* Distance from knot */
 	return ( ((spl->cf[2]*x + spl->cf[1])*x + spl->cf[0])*x + spl->y );

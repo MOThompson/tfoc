@@ -148,7 +148,7 @@ static REFL my_TFOC_ReflN(double theta, POLARIZATION mode, double lambda, TFOC_L
 				 sqrt(1.0-sin_out*sin_out) / cos(theta*pi/180.0f);	/* Angle correction */
 	}
 
-	return(rc);
+	return rc;
 }
 
 
@@ -207,7 +207,7 @@ static REFL my_TFOC_Refl(double theta, POLARIZATION mode, double lambda, COMPLEX
 				 sqrt(1.0-sin_out*sin_out) / cos(theta*pi/180.0f);	/* Angle correction */
 	}
 
-	return(rc);
+	return rc;
 }
 
 /* ===========================================================================
@@ -225,7 +225,12 @@ static M_ARRAY CalcGap(double z, double S, COMPLEX ni, double lambda) {
 	cos_theta_i = CSQRT(1.0-S*S/(ni.x*ni.x+ni.y*ni.y));	/* If < 0 evanescent */
 /*	cos_theta_i = sqrt(1.0-pow(S/ni.x,2)); */
 
-	phase = CMUL(ni,cos_theta_i);
+/* --------------------------------------------------------------------
+ * 2023.07.13 - Mike Thompson
+ * Major screwup that has been in the code for 20+ years.  The phase
+ * should be ni DIVIDED by cos_theta_i, not MULTIPLIED.
+ * ----------------------------------------------------------------- */
+	phase = CDIV(ni,cos_theta_i);
 	phase.x *= (2*pi/lambda)*z;
 	phase.y *= (2*pi/lambda)*z;
 /*	phase.x = ni.x*(2*pi/lambda)*z*cos_theta_i; */
@@ -236,7 +241,7 @@ static M_ARRAY CalcGap(double z, double S, COMPLEX ni, double lambda) {
 	Cij.D.x = cos(-phase.x) * exp(phase.y);
 	Cij.D.y = sin(-phase.x) * exp(phase.y);
 	Cij.B.x = Cij.B.y = Cij.C.x = Cij.C.y = 0.0;
-	return(Cij);
+	return Cij;
 }
 
 
@@ -255,7 +260,7 @@ static M_ARRAY CalcInterface(double S, POLARIZATION mode, COMPLEX ni, COMPLEX nj
 
 	Cij.A = Cij.D = CDIV(one, tij);
 	Cij.B = Cij.C = CDIV(rij, tij);
-	return(Cij);
+	return Cij;
 }
 
 /* ===========================================================================
@@ -297,7 +302,7 @@ static BOOL CalcFresnel(double S, POLARIZATION mode, COMPLEX ni, COMPLEX nj, COM
 #ifdef DEBUG
 	printf("rij: %g%+gi\ttij: %g%+gi\n", rij->x, rij->y, tij->x, tij->y);
 #endif
-	return(TRUE);
+	return TRUE;
 }
 		
 #if 0												/* Not actually used ... so comment out */
@@ -344,21 +349,21 @@ COMPLEX CADD(COMPLEX a, COMPLEX b) {
 	COMPLEX result;
 	result.x = a.x+b.x;
 	result.y = a.y+b.y;
-	return(result);
+	return result;
 }
 	
 COMPLEX CSUB(COMPLEX a, COMPLEX b) {
 	COMPLEX result;
 	result.x = a.x-b.x;
 	result.y = a.y-b.y;
-	return(result);
+	return result;
 }
 	
 COMPLEX CMUL(COMPLEX a, COMPLEX b) {
 	COMPLEX result;
 	result.x = a.x*b.x - a.y*b.y;
 	result.y = a.x*b.y + a.y*b.x;
-	return(result);
+	return result;
 }
 
 COMPLEX CDIV(COMPLEX a, COMPLEX b) {
@@ -367,7 +372,7 @@ COMPLEX CDIV(COMPLEX a, COMPLEX b) {
 	magn = b.x*b.x+b.y*b.y;
 	result.x =  ( a.x*b.x + a.y*b.y) / magn ;
 	result.y =  (-a.x*b.y + a.y*b.x) / magn ;
-	return(result);
+	return result;
 }
 
 double CABS(COMPLEX a) {
@@ -381,7 +386,7 @@ COMPLEX CSQRT(double r) {
 #ifdef DEBUG
 	printf("CSQRT: %g %g %g\n", r, c.x, c.y);
 #endif
-	return(c);
+	return c;
 }
 
 COMPLEX CCSQRT(COMPLEX r) {
@@ -395,7 +400,7 @@ COMPLEX CCSQRT(COMPLEX r) {
 #ifdef DEBUG
 	printf("CSQRT: %g %g = %g %g\n", r.x, r.y, c.x, c.y);
 #endif
-	return(c);
+	return c;
 }
 
 COMPLEX CPOW(COMPLEX r, double n) {
@@ -409,5 +414,5 @@ COMPLEX CPOW(COMPLEX r, double n) {
 #ifdef DEBUG
 	printf("CPOW: (%g %g)^%f = %g %g   %g %g\n", r.x, r.y, n, c.x, c.y, r0, theta);
 #endif
-	return(c);
+	return c;
 }
