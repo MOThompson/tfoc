@@ -52,6 +52,7 @@ typedef struct _TFOC_LAYER {
 	TFOC_LAYER_TYPE type;
 	double z;									/* Thickness							*/
 	COMPLEX n;									/* Current n,k value (doped)		*/
+	char *name;									/* Name (pointer into TFOC_SAMPLE) */
 	double doping;
 	int layer;
 } TFOC_LAYER;
@@ -72,6 +73,14 @@ void TFOC_PrintDetail(TFOC_SAMPLE *sample, TFOC_LAYER *layers);
 REFL TFOC_ReflN(double theta, POLARIZATION mode, double lambda, TFOC_LAYER layer[]);
 REFL TFOC_Refl(double theta, POLARIZATION mode, double lambda, COMPLEX n0, COMPLEX n1, COMPLEX ns, double z);
 
+
+/* Debug interface */
+int TFOC_Debug_Flag;
+#define	DEBUG_DATABASE				(0x01)
+#define	DEBUG_FRESNEL				(0x02)
+#define	DEBUG_MATRIX				(0x04)
+#define	DEBUG_COMPLEX_MATH		(0x100)
+#define	DEBUG_MOST					(0xFF)		/* All but complex math calculation modules */
 
 #ifdef TFOC_CODE
 	#define	pi				(3.141592653589793)				/* Guess	*/

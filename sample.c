@@ -55,8 +55,8 @@ double cpmax = 1E20, cnmax=3E20;				/* Maximum activated concentrations n and p 
 
 /* ===========================================================================
 -- Convert the high level sample description into a number of fundamental
--- layers to run in Fresnel.  The layers need only n and z.  Expand the
--- doping profiles in this routine.
+-- layers to run in Fresnel.  The layers need only n and z, but also include
+-- the material name for debugging.  Expand the doping profiles in this routine.
 =========================================================================== */
 void TFOC_MakeLayers(TFOC_SAMPLE *sample, TFOC_LAYER *layers, double T, double lambda) {
 	double a,b,peak,posn,doping, dz, w, temperature;
@@ -78,6 +78,7 @@ void TFOC_MakeLayers(TFOC_SAMPLE *sample, TFOC_LAYER *layers, double T, double l
 				lay->type   = SUBLAYER;								/* Type of layer	*/
 				lay->n      = sam->n;								/* Index				*/
 				lay->z      = sam->z;								/* And thickness	*/
+				lay->name   = sam->name;
 				lay->doping  = 0;
 				lay++;
 				break;
@@ -86,6 +87,7 @@ void TFOC_MakeLayers(TFOC_SAMPLE *sample, TFOC_LAYER *layers, double T, double l
 				lay->type   = SUBLAYER;								/* Type of layer	*/
 				lay->n      = sam->n;								/* Index				*/
 				lay->z      = sam->z;								/* And thickness	*/
+				lay->name   = sam->name;
 				lay->doping = LIMIT_DOPING(sam->doping_parms[0]);				/* Doping level	*/
 				lay->n.y += -fc_k(lay->doping, 0, temperature, lambda/1000.0, fc_mode);	/* FE Correction	*/
 				lay++;
@@ -101,6 +103,7 @@ void TFOC_MakeLayers(TFOC_SAMPLE *sample, TFOC_LAYER *layers, double T, double l
 					lay->type   = SUBLAYER;
 					lay->n      = sam->n;
 					lay->z      = dz;
+					lay->name   = sam->name;
 					lay->doping = LIMIT_DOPING(doping);
 					lay->n.y += -fc_k(lay->doping, 0, temperature, lambda/1000.0, fc_mode);
 					lay++;
@@ -119,6 +122,7 @@ void TFOC_MakeLayers(TFOC_SAMPLE *sample, TFOC_LAYER *layers, double T, double l
 					lay->type   = SUBLAYER;
 					lay->n      = sam->n;
 					lay->z      = dz;
+					lay->name   = sam->name;
 					lay->doping = LIMIT_DOPING(doping);
 					lay->n.y += -fc_k(lay->doping, 0, temperature, lambda/1000.0, fc_mode);
 					lay++;
@@ -135,6 +139,7 @@ void TFOC_MakeLayers(TFOC_SAMPLE *sample, TFOC_LAYER *layers, double T, double l
 					lay->type   = SUBLAYER;
 					lay->n      = sam->n;
 					lay->z      = dz;
+					lay->name   = sam->name;
 					lay->doping = LIMIT_DOPING(doping);
 					lay->n.y += -fc_k(lay->doping, 0, temperature, lambda/1000.0, fc_mode);
 					lay++;

@@ -25,7 +25,6 @@
 /* My local typedef's and defines  */
 /* ------------------------------- */
 #define	panic			SysPanic(__FILE__, __LINE__)
-/* #define DEBUG */
 
 typedef struct _M_ARRAY {
 	COMPLEX A,B,C,D;
@@ -74,12 +73,12 @@ static M_ARRAY MATMUL(M_ARRAY *a, M_ARRAY *b);
 -- Routine to print out an array for user	interpretation
 =========================================================================== */
 void Print_M_Array(M_ARRAY m, char *text) {
-#ifdef DEBUG
-	printf("%s\n", text);
-	printf("%g%+gi\t%g%+gi\n", m.A.x, m.A.y, m.B.x, m.B.y);
-	printf("%g%+gi\t%g%+gi\n", m.C.x, m.C.y, m.D.x, m.D.y);
-	printf("\n");
-#endif
+	if (TFOC_Debug_Flag & DEBUG_MATRIX) {
+		printf("%s\n", text);
+		printf("  %g%+gi\t%g%+gi\n", m.A.x, m.A.y, m.B.x, m.B.y);
+		printf("  %g%+gi\t%g%+gi\n", m.C.x, m.C.y, m.D.x, m.D.y);
+		printf("\n");
+	}
 	return;
 }
 
@@ -111,31 +110,38 @@ static REFL my_TFOC_ReflN(double theta, POLARIZATION mode, double lambda, TFOC_L
 	M_ARRAY Ct, Cij, Ciz;
 	COMPLEX ni,nj,one={1.0, 0.0};
 	REFL rc;
+	char szBuf[256];
 	int i;
 
 	S = layer[0].n.x*sin(theta*pi/180.0f);				/* S factor */
 
 	Ct = IDENTITY_MATRIX();									/* Make an identify matrix */
-	Print_M_Array(Ct, "Ct");
+	sprintf_s(szBuf, sizeof(szBuf), "Ct initial incident indentify matrix (%s)", layer[0].name);
+	Print_M_Array(Ct, szBuf);
 
 	ni = layer[0].n;											/* Current is incident */
 	for (i=1; layer[i].type == SUBLAYER; i++) {
 		if (layer[i].z <= 0.0) continue;					/* Not really there	*/
 		nj  = layer[i].n;
 		Cij = CalcInterface(S, mode, ni, nj);
-		Print_M_Array(Cij, "Cij");
+		sprintf_s(szBuf, sizeof(szBuf), "Cij boundary into layer %d (%s)", i, layer[i].name);
+		Print_M_Array(Cij, szBuf);
 		Ciz = CalcGap(layer[i].z, S, nj, lambda);
-		Print_M_Array(Ciz, "Ciz");
+		sprintf_s(szBuf, sizeof(szBuf), "Ciz propogation matrix for %.2f nm", layer[i].z);
+		Print_M_Array(Ciz, szBuf);
 		Ct = MATMUL(&Ct, &Cij);
-		Print_M_Array(Ct, "Ct");
+		Print_M_Array(Ct, "Ct multiplied by boundary matrix");
 		Ct = MATMUL(&Ct, &Ciz);
-		Print_M_Array(Ct, "Ct");
+		Print_M_Array(Ct, "Ct multiplied by propogation matrix");
 		ni = nj;
 	}
 
 /* And add the substrate */
 	Cij = CalcInterface(S,mode,ni,layer[i].n);
+	sprintf_s(szBuf, sizeof(szBuf), "Cij final boundary matrix to substrate (%s)", layer[i].name);
+	Print_M_Array(Cij, szBuf);
 	Ct = MATMUL(&Ct, &Cij);
+	Print_M_Array(Ct, "Ct final matrix into substrate");
 
 /* Calculate the reflectivity */
 	rc.R = pow(CABS(CDIV(Ct.C,Ct.A)),2);
@@ -280,10 +286,11 @@ static BOOL CalcFresnel(double S, POLARIZATION mode, COMPLEX ni, COMPLEX nj, COM
 #endif
 	cos_theta_i = CSQRT(1.0-S*S/(ni.x*ni.x+ni.y*ni.y));	/* If < 0 evanescent */
 	cos_theta_j = CSQRT(1.0-S*S/(nj.x*nj.x+nj.y*nj.y));	/* If < 0 evanescent */
-#ifdef DEBUG
-	printf("S: %g\tmode: %d\tni: %g%+gi\tnj: %g%+gi\n", S, mode, ni.x, ni.y, nj.x, nj.y);
-	printf("cos_theta_i: %g%+gi\tcos_theta_j: %g%+gi\n", cos_theta_i.x, cos_theta_i.y, cos_theta_j.x, cos_theta_j.y);
-#endif
+	if (TFOC_Debug_Flag & DEBUG_FRESNEL) {
+		printf("Calculating Fresnel reflectance and transmission coefficients\n");
+		printf("  S: %g\tmode: %d\tni: %g%+gi\tnj: %g%+gi\n", S, mode, ni.x, ni.y, nj.x, nj.y);
+		printf("  cos_theta_i: %g%+gi\tcos_theta_j: %g%+gi\n", cos_theta_i.x, cos_theta_i.y, cos_theta_j.x, cos_theta_j.y);
+	}
 
 	if (mode == TE) {													/* Transverse electric */
 		a = CSUB(CMUL(ni,cos_theta_i),CMUL(nj,cos_theta_j));
@@ -299,9 +306,10 @@ static BOOL CalcFresnel(double S, POLARIZATION mode, COMPLEX ni, COMPLEX nj, COM
 		*tij = CDIV(a,b);												/* Transmission coefficient */
 	}
 
-#ifdef DEBUG
-	printf("rij: %g%+gi\ttij: %g%+gi\n", rij->x, rij->y, tij->x, tij->y);
-#endif
+	if (TFOC_Debug_Flag & DEBUG_FRESNEL) {
+		printf("  rij: %g%+gi\ttij: %g%+gi\n\n", rij->x, rij->y, tij->x, tij->y);
+	}
+
 	return TRUE;
 }
 		
@@ -383,9 +391,9 @@ COMPLEX CSQRT(double r) {
 	COMPLEX c;
 	c.x = (r>0) ? sqrt(r)  : 0;
 	c.y = (r<0) ? sqrt(-r) : 0;
-#ifdef DEBUG
-	printf("CSQRT: %g %g %g\n", r, c.x, c.y);
-#endif
+
+	if (TFOC_Debug_Flag & DEBUG_COMPLEX_MATH) printf("CSQRT: %g %g %g\n", r, c.x, c.y);
+
 	return c;
 }
 
@@ -397,9 +405,9 @@ COMPLEX CCSQRT(COMPLEX r) {
 	theta = atan2(r.y, r.x);
 	c.x = sqrt(r0)*cos(theta/2);
 	c.y = sqrt(r0)*sin(theta/2);
-#ifdef DEBUG
-	printf("CSQRT: %g %g = %g %g\n", r.x, r.y, c.x, c.y);
-#endif
+
+	if (TFOC_Debug_Flag & DEBUG_COMPLEX_MATH) printf("CSQRT: %g %g = %g %g\n", r.x, r.y, c.x, c.y);
+
 	return c;
 }
 
@@ -411,8 +419,8 @@ COMPLEX CPOW(COMPLEX r, double n) {
 	theta = atan2(r.y, r.x);
 	c.x = pow(r0,n)*cos(theta*n);
 	c.y = pow(r0,n)*sin(theta*n);
-#ifdef DEBUG
-	printf("CPOW: (%g %g)^%f = %g %g   %g %g\n", r.x, r.y, n, c.x, c.y, r0, theta);
-#endif
+
+	if (TFOC_Debug_Flag & DEBUG_COMPLEX_MATH) printf("CPOW: (%g %g)^%f = %g %g   %g %g\n", r.x, r.y, n, c.x, c.y, r0, theta);
+
 	return c;
 }

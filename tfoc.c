@@ -77,6 +77,11 @@ static void PrintUsage(void);
 /* Locally defined global vars     */
 /* ------------------------------- */
 
+/* ------------------------------- */
+/* My share of  global vars        */
+/* ------------------------------- */
+int TFOC_Debug_Flag = 0;						/* Can set as an options ... varies */
+
 
 /* ===========================================================================
 -- Relatively simple routine to update the N,K values in the sample
@@ -98,8 +103,6 @@ int main(int argc, char *argv[]) {
 	BOOL detail=FALSE;								/* Output layer information? */
 	NKMOD *tmp, *tmp2;
 	REFL result;
-
-	BOOL debug = FALSE;								/* Can set as an options ... varies */
 
 	/* For determining the database directory */
 	struct _stat info;
@@ -137,7 +140,7 @@ int main(int argc, char *argv[]) {
 			return 0;
 
 		} else if (_stricmp(aptr, "debug") == 0) {
-			debug = TRUE;
+			TFOC_Debug_Flag = DEBUG_MOST;
 			
 		} else if (_stricmp(aptr, "terse") == 0) {
 			terse = TRUE;
@@ -435,7 +438,7 @@ int main(int argc, char *argv[]) {
 		}
 	}
 	strcat_s(database, sizeof(database), "/");														/* Append trailing path delimiter */
-	if (debug) fprintf(stderr, "tfoc database set as: \"%s\"\n", database); fflush(stderr);
+	if (TFOC_Debug_Flag & DEBUG_DATABASE) fprintf(stderr, "tfoc database set as: \"%s\"\n\n", database); fflush(stderr);
 	
 /* --------------------------------------------------------------------------------
 -- Okay, look up the materials and fill in n,k values for each layer directly from
